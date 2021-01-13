@@ -9,7 +9,7 @@ if __name__ == "__main__":
     setup(
         name="pyindia_stock",
         scripts=['scripts/pyindia_stock', ],
-        version="0.1.1",
+        version="0.0.1",
         description="Stock Prediction using FBProphet",
         long_description=long_desc,
         long_description_content_type="text/markdown",
