@@ -55,7 +55,7 @@ def analyze_stock(symbol):
         if df.empty:
             return f"⚠️ *{symbol}*: Empty data returned."
         
-        # Get Prophet forecast
+        # Get FBProphet forecast
         prophet_model = analysis.fbprophet
         future = prophet_model.make_future_dataframe(periods=1)
         forecast = prophet_model.predict(future)
@@ -71,13 +71,13 @@ def analyze_stock(symbol):
         # Simple recommendation logic
         if predicted_price > current_price * 1.02:  # 2% expected rise
             recommendation = "🟢 *Buy*"
-            reason = "Predicted price rise based on Prophet forecast."
+            reason = "Predicted price rise based on FBProphet forecast."
         elif predicted_price < current_price * 0.98:  # 2% expected fall
             recommendation = "🔴 *Sell*"
-            reason = "Predicted price drop based on Prophet forecast."
+            reason = "Predicted price drop based on FBProphet forecast."
         else:
             recommendation = "🟡 *Hold*"
-            reason = "Stable price predicted by Prophet."
+            reason = "Stable price predicted by FBProphet."
         
         return (f"{recommendation} *{escape_markdown(symbol)}*\n"
                 f"Current Price: ₹{current_price:.2f}\n"
@@ -85,17 +85,17 @@ def analyze_stock(symbol):
                 f"Reason: {escape_markdown(reason)}")
     
     except ImportError as e:
-        return f"⚠️ *{symbol}*: Dependency error - {str(e)}. Ensure Prophet is installed."
+        return f"⚠️ *{symbol}*: Dependency error - {str(e)}. Ensure FBProphet is installed."
     except Exception as e:
         return f"⚠️ *{symbol}*: Error during analysis - {str(e)}"
 
 def main():
     """Main function to analyze stocks and send Telegram notifications."""
     try:
-        # Check if Prophet is installed
-        import prophet
+        # Check if FBProphet is installed
+        import fbprophet
     except ImportError:
-        error_msg = "🚨 *Critical Error*: Prophet/FBProphet not installed. Please check workflow setup."
+        error_msg = "🚨 *Critical Error*: FBProphet not installed. Please check workflow setup."
         send_telegram_message(error_msg)
         sys.exit(1)
 
@@ -114,7 +114,7 @@ def main():
                f"{'-' * 50}\n"
                f"Disclaimer: This analysis is for educational purposes only. "
                f"Not SEBI-registered advice. Always conduct your own research before trading.\n"
-               f"Data source: pyindia_stock with Prophet forecasting.")
+               f"Data source: pyindia_stock with FBProphet forecasting.")
     send_telegram_message(summary)
 
     print("Analysis completed and notifications sent.")
