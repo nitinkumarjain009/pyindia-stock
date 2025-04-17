@@ -1,0 +1,56 @@
+name: Nifty 50 Stock Analysis and Telegram Notifications
+
+on:
+  schedule:
+    - cron: '30 3 * * *' # Runs daily at 9 AM IST (3:30 AM UTC)
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  analyze-and-notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Python
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Cache pip dependencies
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyindia-stock requests
+
+      # Run the analysis script
+      - name: Run Nifty 50 analysis
+        env:
+          TELEGRAM_BOT_TOKEN: '8017759392:AAEwM-W-y83lLXTjlPl8sC_aBmizuIrFXnU'
+          TELEGRAM_CHAT_ID: '711856868'
+        run: |
+          python nifty50_analysis.py
+
+      # Notify on failure
+      - name: Notify Telegram on failure
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d text="⚠️ Nifty 50 Analysis Workflow failed. Please check GitHub Actions logs." \
+            -d parse_mode="MarkdownV2"
