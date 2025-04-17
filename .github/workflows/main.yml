@@ -1,4 +1,4 @@
-name: Nifty 50 Stock Analysis and Telegram Notifications
+name: Stock Analysis and Telegram Notifications
 
 on:
   schedule:
@@ -14,11 +14,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Set up Python
-      - name: Set up Python 3.12
+      # Install system dependencies for fbprophet/prophet
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libstan-dev python3-dev g++
+
+      # Set up Python 3.8 (more stable for fbprophet)
+      - name: Set up Python 3.8
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.8'
 
       # Cache pip dependencies
       - name: Cache pip
@@ -33,24 +39,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyindia-stock requests
+          pip install pyindia-stock requests prophet==1.1.5
+          # Alternatively, for fbprophet: pip install fbprophet==0.7.1
 
       # Run the analysis script
-      - name: Run Nifty 50 analysis
-        env:
-          TELEGRAM_BOT_TOKEN: '8017759392:AAEwM-W-y83lLXTjlPl8sC_aBmizuIrFXnU'
-          TELEGRAM_CHAT_ID: '711856868'
+      - name: Run stock analysis
         run: |
           python nifty50_analysis.py
 
       # Notify on failure
       - name: Notify Telegram on failure
         if: failure()
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            -d chat_id="${TELEGRAM_CHAT_ID}" \
-            -d text="⚠️ Nifty 50 Analysis Workflow failed. Please check GitHub Actions logs." \
+          curl -s -X POST "https://api.telegram.org/bot8017759392:AAEwM-W-y83lLXTjlPl8sC_aBmizuIrFXnU/sendMessage" \
+            -d chat_id="711856868" \
+            -d text="⚠️ Stock Analysis Workflow failed. Please check GitHub Actions logs." \
             -d parse_mode="MarkdownV2"
