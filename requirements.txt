@@ -1,2 +1,1 @@
-fbprophet
-libstan-dev
+pyindia-stock requests fbprophet==0.7.1
