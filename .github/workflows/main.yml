@@ -14,11 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install system dependencies for fbprophet/prophet
+      # Install system dependencies for prophet/fbprophet
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libstan-dev python3-dev g++
+          sudo apt-get install -y build-essential python3-dev g++
 
       # Set up Python 3.8 (more stable for fbprophet)
       - name: Set up Python 3.8
